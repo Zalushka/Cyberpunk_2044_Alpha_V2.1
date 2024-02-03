@@ -47,42 +47,42 @@ image.src = 'stinger.png';
 let animations = [
     {
         name: 'Run to right',
-        animation: './Raider_1/Run.png',
+        animation: 'Run.png',
         frames: 6,
         image: new Image()
     },
 
     {
         name: 'Run to left',
-        animation: './Raider_1/Run_left.png',
+        animation: 'Run_left.png',
         frames: 6,
         image: new Image()
     },
 
     {
         name: 'idle',
-        animation: './Raider_1/idle.png',
+        animation: 'idle.png',
         frames: 4,
         image: new Image()
     },
 
     {
         name: 'jump',
-        animation: './Raider_1/Jump.png',
+        animation: 'Jump.png',
         frames: 9,
         image: new Image()
     },
 
     {
         name: 'jump to left',
-        animation: './Raider_1/Jump_left.png',
+        animation: 'Jump_left.png',
         frames: 9,
         image: new Image()
     },
 
     {
         name: 'idle_left',
-        animation: './Raider_1/idle_left.png',
+        animation: 'idle_left.png',
         frames: 4,
         image: new Image()
     },
