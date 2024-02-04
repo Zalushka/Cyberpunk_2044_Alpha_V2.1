@@ -1,29 +1,51 @@
 var index = 2;
 
+let cooldown = false;
+
 document.addEventListener('keydown', (e) => {
     if (e.code == 'KeyD') user.xvr = 7, index = 0;
     if (e.code == 'KeyA') user.xvl = -7, index = 1;
     if (e.code == 'KeyW') {
-        if (grounded) {
-            user.yv = -10, grounded = false;
+        if (user_grounded) {
+            user.yv = -10, user_grounded = false;
             if (index == 1) {
-                index = 4
+                index = 4;
             } else if (index == 0) {
                 index = 3;
-            }else if(index == 2){
-                index = 3
-            }else if(index == 5){
-                index = 4
-            }
-        }
-    }
-
+            } else if (index == 2) {
+                index = 3;
+            } else if (index == 5) {
+                index = 4;
+            };
+        };
+    };
 });
 
-document.addEventListener('keyup', (e) => {
-    if (e.code == 'KeyD') {user.xvr = 0; if(index == 0) index = 2};
-    if (e.code == 'KeyA') {user.xvl = 0; if(index == 1) index = 5;}
+document.onmousedown = () => {
+    if (cooldown == false) {
+        index = 6;
+        cooldown = true;
+    }else if (cooldown == true){
+        setTimeout(() => {
+            cooldown = false;
+        }, 500)
+    }
 
+};
+
+document.onmouseup = () => {
+    if(cooldown == true){
+        setTimeout(() => {
+            index = 2;
+        }, 250);
+    }
+}
+
+
+
+document.addEventListener('keyup', (e) => {
+    if (e.code == 'KeyD') { user.xvr = 0; if (index == 0) index = 2 };
+    if (e.code == 'KeyA') { user.xvl = 0; if (index == 1) index = 5 };
 });
 
 const
@@ -33,16 +55,13 @@ const
 w = canvas.width = window.innerWidth;
 h = canvas.height = window.innerHeight;
 
-let grounded = false;
+let user_grounded = false;
+let enemy_grounded = false;
 
 let gameframe = 0;
 
-
-
 let image = new Image();
 image.src = 'stinger.png';
-
-
 
 let animations = [
     {
@@ -86,6 +105,13 @@ let animations = [
         frames: 4,
         image: new Image()
     },
+
+    {
+        name: 'Shot',
+        animation: 'Shot.png',
+        frames: 4,
+        image: new Image()
+    }
 ];
 
 const propert = {
@@ -98,7 +124,6 @@ function backDraw() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, w, h);
     ctx.fill();
-
 };
 
 class Player {
@@ -113,7 +138,8 @@ class Player {
         this.width = this.spriteWidth;
         this.height = this.spriteHeight
         this.frame = 0;
-    }
+        this.attack = 0.5;
+    };
 
     draw(ctx) {
         ctx.beginPath();
@@ -128,17 +154,42 @@ class Player {
         let playerImage = new Image();
         playerImage.src = animations[index].animation
 
-        if (gameframe % 5 === 0) {
+        if (gameframe % 4 === 0) {
             this.frame > animations[index].frames ? this.frame = 0 : this.frame++;
         }
 
         ctx.drawImage(playerImage, this.frame * this.spriteWidth, 0, this.spriteHeight, this.spriteHeight, this.x - 10, this.y - 27, this.width, this.height)
 
 
-    }
+    };
+};
+
+class Enemy {
+    constructor(x, y, yv, health) {
+        this.x = x;
+        this.y = y;
+        this.yv = yv;
+        this.health = health;
+    };
+
+    drawEnemy(ctx) {
+        ctx.beginPath();
+        ctx.strokeStyle = propert.fillColor;
+        this.y += this.yv;
+        ctx.strokeRect(this.x, this.y, 100, 100);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = 'white'
+        ctx.font = '20px white';
+        ctx.fillText(this.health, this.x + 35, this.y + 55);
+    };
 };
 
 var user = new Player(w / 2, h / 2, 0, 0, 0);
+
+var Enemy_pos = Math.random() * w;
+var enemy = new Enemy(Enemy_pos, h / 2, 0, 100);
 
 var randomPlace = Math.random() * w;
 
@@ -157,7 +208,6 @@ class Trap {
         ctx.closePath()
 
         this.xpos += this.speed;
-        console.log(this.xpos)
 
         ctx.beginPath();
         ctx.fillStyle = 'rgba(244, 40, 40, 0.25)';
@@ -167,7 +217,7 @@ class Trap {
         ctx.drawImage(image, this.xpos, this.ypos, propert.tringlesize, propert.tringlesize);
     };
 
-}
+};
 
 var stinger = new Trap(randomPlace, h - 85, 'white');
 
@@ -178,17 +228,30 @@ function collision() {
         user.y + 100 >= h - 105
     ) {
         user.y = h - 210;
-        grounded = true;
+        user_grounded = true;
 
     };
 
-    if(stinger.xpos >= randomPlace + 50){
+
+    if (user.x + 100 >= enemy.x &&
+        user.x <= enemy.x && index == 6
+    ) {
+        enemy.health -= user.attack;
+        console.log(enemy.health);
+    }
+
+    if (stinger.xpos >= randomPlace + 50) {
         stinger.xpos = randomPlace - 100;
     }
 
     if (user.y >= h - 150) {
         user.y = h - 150;
-        grounded = true;
+        user_grounded = true;
+    };
+
+    if (enemy.y >= h - 150) {
+        enemy.y = h - 150;
+        enemy_grounded = true;
     };
 
     if (user.x >= w + 100) {
@@ -211,18 +274,20 @@ function collision() {
 };
 
 setInterval(function gravity() {
-    if (grounded == false) {
+    if (user_grounded == false) {
         user.yv += 0.05;
+    };
+    if (enemy_grounded == false) {
+        enemy.yv += 0.05;
     }
 });
 
 function loop() {
     backDraw();
-    user.draw(ctx)
+    user.draw(ctx);
     collision();
-//    traps.forEach(element => {
-        stinger.spawnTrap(ctx);
- //   });
+    stinger.spawnTrap(ctx);
+    enemy.drawEnemy(ctx);
     gameframe++;
     requestAnimationFrame(loop);
 };
