@@ -61,7 +61,7 @@ let animations = [
 
     {
         name: 'idle',
-        animation: 'idle.png',
+        animation: 'Idle.png',
         frames: 4,
         image: new Image()
     },
@@ -82,7 +82,7 @@ let animations = [
 
     {
         name: 'idle_left',
-        animation: 'idle_left.png',
+        animation: 'Idle_left.png',
         frames: 4,
         image: new Image()
     },
